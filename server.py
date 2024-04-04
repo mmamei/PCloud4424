@@ -1,5 +1,6 @@
 from flask import Flask,request,redirect,url_for
 import json
+from joblib import load
 
 app = Flask(__name__)
 
@@ -34,6 +35,11 @@ def get_data(s):
         r = []
         for i in range(len(db[s])):
             r.append([i,db[s][i][1]])
+
+        model = load('model.joblib')
+        yp = model.predict([[r[-1][1],r[-2][1],r[-3][1],0]])
+        r.append([len(db[s]),yp[0]])
+
         return json.dumps(r),200
     else:
         return 'sensor not found',404

@@ -1,2 +1,4 @@
 flask
 requests
+joblib
+scikit-learn==1.3.2
