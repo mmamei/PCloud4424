@@ -7,6 +7,7 @@ db = {}
 
 @app.route('/graph', methods=['GET'])
 def graph():
+    print('ciao')
     return redirect(url_for('static', filename='graph.html'))
 
 
