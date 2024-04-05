@@ -37,8 +37,9 @@ def get_data(s):
             r.append([i,db[s][i][1]])
 
         model = load('model.joblib')
-        yp = model.predict([[r[-1][1],r[-2][1],r[-3][1],0]])
-        r.append([len(db[s]),yp[0]])
+        for i in range(10):
+            yp = model.predict([[r[-1][1],r[-2][1],r[-3][1],0]])
+            r.append([len(r),yp[0]])
 
         return json.dumps(r),200
     else:
@@ -47,4 +48,5 @@ def get_data(s):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
+    print('ciao')
 
