@@ -81,33 +81,16 @@
 			<script src="/static/assets/js/main.js"></script>
 		 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 			<script type="text/javascript">
-
-
-
-				$.get("/sensors/s1",function(datav, status){
-					//console.log(datav)
-					datav = JSON.parse(datav)
-					console.log(datav)
-
-
 					google.charts.load('current', {packages: ['corechart', 'line']});
 					google.charts.setOnLoadCallback(drawBasic);
 
 					function drawBasic() {
 
-						  var data = new google.visualization.DataTable();
-						  data.addColumn('number', 'Time');
-						  data.addColumn('number', 'PM10');
-						  data.addColumn('number', 'Forecast');
-						  console.log(datav)
-						  datav2 = []
-						  for(i=0; i<datav.length;i++)
-						  	if (i < datav.length - 10)
-						  		datav2.push([datav[i][0],datav[i][1],null])
-						  	else
-						  		datav2.push([datav[i][0],null,datav[i][1]])
-						  console.log(datav2)
-						  data.addRows(datav2);
+						var data = google.visualization.arrayToDataTable([
+							  ['Time', 'PM10', 'Forecast'],
+							  {{data|safe}}
+						]);
+
 
 						  var options = {
 							hAxis: {
@@ -124,7 +107,7 @@
    					}
 
 
-				})
+
 
 			</script>
 

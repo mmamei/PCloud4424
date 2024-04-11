@@ -1,4 +1,4 @@
-from flask import Flask,request,redirect,url_for
+from flask import Flask,request,redirect,url_for,render_template
 import json
 from joblib import load
 
@@ -11,6 +11,19 @@ def graph():
     print('ciao')
     return redirect(url_for('static', filename='graph.html'))
 
+@app.route('/graph2', methods=['GET'])
+def graph2():
+    print('ciao2')
+    d2 = json.loads(get_data('s1')[0])
+    ds = '' # ['2004',  1000,      null],
+    for x in d2[:-10]:
+        ds += f"['{x[0]}',{x[1]},null],\n"
+    for x in d2[-10:]:
+        ds += f"['{x[0]}',null, {x[1]}],\n"
+    print(ds)
+
+
+    return render_template('graph.html',data=ds)
 
 
 @app.route('/sensors',methods=['GET'])
