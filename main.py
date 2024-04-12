@@ -1,14 +1,55 @@
 from flask import Flask,request,redirect,url_for,render_template
+from flask_login import LoginManager, current_user, login_user, logout_user, login_required, UserMixin
+from secret import secret_key
+
 import json
 from joblib import load
 
+class User(UserMixin):
+    def __init__(self, username):
+        super().__init__()
+        self.id = username
+        self.username = username
+
 app = Flask(__name__)
+app.config['SECRET_KEY'] = secret_key
+login = LoginManager(app)
+login.login_view = '/static/login.html'
+
+usersdb = {
+    'marco':'mamei'
+}
+
+@login.user_loader
+def load_user(username):
+    if username in usersdb:
+        return User(username)
+    return None
+
+@app.route('/login', methods=['POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('/sensors'))
+    username = request.values['u']
+    password = request.values['p']
+    if username in usersdb and password == usersdb[username]:
+        login_user(User(username))
+        return redirect('/sensors')
+    return redirect('/static/login.html')
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect('/')
+
+
 
 db = {}
 
 @app.route('/graph', methods=['GET'])
+@login_required
 def graph():
-    print('ciao')
+    print('ciao',current_user.id)
     return redirect(url_for('static', filename='graph.html'))
 
 @app.route('/graph2', methods=['GET'])
@@ -25,10 +66,15 @@ def graph2():
 
     return render_template('graph.html',data=ds)
 
+@app.route('/',methods=['GET'])
+def main():
+    return sensors()
 
 @app.route('/sensors',methods=['GET'])
 def sensors():
     return json.dumps(list(db.keys())), 200
+
+
 
 
 @app.route('/sensors/<s>',methods=['POST'])
