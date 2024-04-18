@@ -45,8 +45,8 @@ def logout():
 
 db = 'sensors'
 coll = 'data'
-db = firestore.Client.from_service_account_json('credentials.json', database=db)
-
+#db = firestore.Client.from_service_account_json('credentials.json', database=db)
+db = firestore.Client(database=db)
 
 
 @app.route('/graph', methods=['GET'])
