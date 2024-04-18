@@ -1,7 +1,7 @@
 from flask import Flask,request,redirect,url_for,render_template
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required, UserMixin
 from secret import secret_key
-
+from google.cloud import firestore
 import json
 from joblib import load
 
@@ -43,8 +43,11 @@ def logout():
     return redirect('/')
 
 
+db = 'sensors'
+coll = 'data'
+db = firestore.Client.from_service_account_json('credentials.json', database=db)
 
-db = {}
+
 
 @app.route('/graph', methods=['GET'])
 @login_required
@@ -72,8 +75,10 @@ def main():
 
 @app.route('/sensors',methods=['GET'])
 def sensors():
-    return json.dumps(list(db.keys())), 200
-
+    s = []
+    for entity in db.collection(coll).stream():  # select * from sensor2
+        s.append(entity.id)
+    return json.dumps(s), 200
 
 
 
@@ -81,19 +86,30 @@ def sensors():
 def add_data(s):
     data = request.values['data']
     val = float(request.values['val'])
-    if s in db:
-        db[s].append((data,val))
+
+
+    doc_ref = db.collection(coll).document(s)
+    if doc_ref.get().exists:
+        # update
+        diz = doc_ref.get().to_dict()['values']
+        diz[data] = val
+        doc_ref.update({'values': diz})
     else:
-        db[s] = [(data,val)]
+        doc_ref.set({'values': {data:val}})
     return 'ok',200
 
 @app.route('/sensors/<s>',methods=['GET'])
 def get_data(s):
-    if s in db:
-        # return json.dumps(db[s])
+    doc_ref = db.collection(coll).document(s)
+    if doc_ref.get().exists:
         r = []
-        for i in range(len(db[s])):
-            r.append([i,db[s][i][1]])
+        diz = doc_ref.get().to_dict()['values']
+        #diz = sorted(diz)
+
+        i = 0
+        for k,v in diz.items():
+            r.append([i,v])
+            i += 1
 
         model = load('model.joblib')
         for i in range(10):
