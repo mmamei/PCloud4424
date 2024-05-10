@@ -92,10 +92,23 @@ def add_data_http(s):
 def add_data_pubsub():
     dict = json.loads(request.data.decode('utf-8'))  # deserializzazione
     print('**********************')
+
+    '''
+    {'message': 
+    {'attributes': {'d': '2020-01-07 00:00:00', 's': 's2', 'val': '18.0'}, 
+    'data': 'c2F2ZQ==', 
+    'messageId': '11037274795654212', 
+    'message_id': '11037274795654212', 
+    'publishTime': '2024-05-10T14:01:44.932Z', 
+    'publish_time': '2024-05-10T14:01:44.932Z'}, 
+    'subscription': 'projects/pcloud2024-2/subscriptions/push_sub_v2'}
+    '''
+
+
     print(dict)
-    s = dict['s']
-    data = dict['d']
-    val = float(dict['val'])
+    s = dict['message']['attributes']['s']
+    data = dict['message']['attributes']['d']
+    val = float(dict['message']['attributes']['val'])
     store_data(s,data,val)
 
 def store_data(s,data,val):
