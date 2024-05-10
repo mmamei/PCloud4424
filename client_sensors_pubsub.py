@@ -24,10 +24,10 @@ except Exception as e:
 
 with open('CleanData_PM10.csv') as f:
     for l in f.readlines()[1:]:
-        data,val = l.strip().split(',')
-        print(data,val)
+        d,v = l.strip().split(',')
+        print(d,v)
 
-        r = publisher.publish(topic_path, b'save', s=sensor, data=data, val=val)
+        r = publisher.publish(topic_path, b'save', s=sensor, d=d, val=v)
         time.sleep(5)
 
 

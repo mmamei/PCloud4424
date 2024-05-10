@@ -91,9 +91,10 @@ def add_data(s):
 @app.route('/sensors/pubsub',methods=['POST'])
 def add_data():
     dict = json.loads(request.data.decode('utf-8'))  # deserializzazione
+    print('**********************')
     print(dict)
     s = dict['s']
-    data = dict['data']
+    data = dict['d']
     val = float(dict['val'])
     store_data(s,data,val)
 
