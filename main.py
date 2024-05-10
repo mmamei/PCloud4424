@@ -86,8 +86,18 @@ def sensors():
 def add_data(s):
     data = request.values['data']
     val = float(request.values['val'])
+    store_data(s,data,val)
 
+@app.route('/sensors/pubsub',methods=['POST'])
+def add_data():
+    dict = json.loads(request.data.decode('utf-8'))  # deserializzazione
+    print(dict)
+    s = dict['s']
+    data = dict['data']
+    val = float(dict['val'])
+    store_data(s,data,val)
 
+def store_data(s,data,val):
     doc_ref = db.collection(coll).document(s)
     if doc_ref.get().exists:
         # update
