@@ -83,13 +83,13 @@ def sensors():
 
 
 @app.route('/sensors/<s>',methods=['POST'])
-def add_data(s):
+def add_data_http(s):
     data = request.values['data']
     val = float(request.values['val'])
     store_data(s,data,val)
 
 @app.route('/sensors/pubsub',methods=['POST'])
-def add_data():
+def add_data_pubsub():
     dict = json.loads(request.data.decode('utf-8'))  # deserializzazione
     print('**********************')
     print(dict)
