@@ -46,8 +46,8 @@ def logout():
 
 db = 'sensors'
 coll = 'data'
-db = firestore.Client.from_service_account_json('credentials.json', database=db)
-#db = firestore.Client(database=db)
+#db = firestore.Client.from_service_account_json('credentials.json', database=db)
+db = firestore.Client(database=db)
 
 
 @app.route('/graph', methods=['GET'])
@@ -135,7 +135,8 @@ def get_data(s):
             r.append([i,v])
             i += 1
 
-        storage_client = storage.Client.from_service_account_json('credentials.json')
+        #storage_client = storage.Client.from_service_account_json('credentials.json')
+        storage_client = storage.Client()
         bucket = storage_client.bucket('pcloud2024-models')
         blob = bucket.blob('model.joblib')
         blob.download_to_filename('/tmp/model.joblib')
