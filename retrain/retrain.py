@@ -5,7 +5,8 @@ from sklearn.metrics import mean_absolute_error
 from joblib import dump, load
 from google.cloud import firestore, storage
 def retrain():
-    db = firestore.Client.from_service_account_json('../credentials.json', database='sensors')
+    #db = firestore.Client.from_service_account_json('../credentials.json', database='sensors')
+    db = firestore.Client(database='sensors')
     coll = 'data'
     s = 's1'
     doc_ref = db.collection(coll).document(s)
@@ -29,7 +30,8 @@ def retrain():
     print('MAE = ', mean_absolute_error(df['PM10'], model.predict(df[['PM10-1','PM10-2','PM10-3','weekend01']])))
     dump(model, '/tmp/model.joblib')
 
-    client = storage.Client.from_service_account_json('../credentials.json')
+    #client = storage.Client.from_service_account_json('../credentials.json')
+    client = storage.Client()
     bucket = client.bucket('pcloud2024-models')
     source_file_name = '/tmp/model.joblib'
     destination_blob_name = 'model.joblib'
@@ -37,6 +39,7 @@ def retrain():
     blob.upload_from_filename(source_file_name)
 
 
-
+'''
 if __name__ == '__main__':
     retrain()
+'''
