@@ -4,7 +4,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error
 from joblib import dump, load
 from google.cloud import firestore, storage
-def retrain():
+def retrain(event, context):
     #db = firestore.Client.from_service_account_json('../credentials.json', database='sensors')
     db = firestore.Client(database='sensors')
     coll = 'data'
@@ -41,5 +41,5 @@ def retrain():
 
 '''
 if __name__ == '__main__':
-    retrain()
+    retrain(None,None)
 '''
