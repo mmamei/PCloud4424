@@ -4,6 +4,7 @@ from secret import secret_key
 from google.cloud import firestore
 import json
 from joblib import load
+from google.cloud import storage
 
 class User(UserMixin):
     def __init__(self, username):
@@ -45,8 +46,8 @@ def logout():
 
 db = 'sensors'
 coll = 'data'
-#db = firestore.Client.from_service_account_json('credentials.json', database=db)
-db = firestore.Client(database=db)
+db = firestore.Client.from_service_account_json('credentials.json', database=db)
+#db = firestore.Client(database=db)
 
 
 @app.route('/graph', methods=['GET'])
@@ -55,10 +56,10 @@ def graph():
     print('ciao',current_user.id)
     return redirect(url_for('static', filename='graph.html'))
 
-@app.route('/graph2', methods=['GET'])
-def graph2():
+@app.route('/graph2/<s>', methods=['GET'])
+def graph2(s):
     print('ciao2')
-    d2 = json.loads(get_data('s1')[0])
+    d2 = json.loads(get_data(s)[0])
     ds = '' # ['2004',  1000,      null],
     for x in d2[:-10]:
         ds += f"['{x[0]}',{x[1]},null],\n"
@@ -104,7 +105,6 @@ def add_data_pubsub():
     'subscription': 'projects/pcloud2024-2/subscriptions/push_sub_v2'}
     '''
 
-
     print(dict)
     s = dict['message']['attributes']['s']
     data = dict['message']['attributes']['d']
@@ -135,7 +135,11 @@ def get_data(s):
             r.append([i,v])
             i += 1
 
-        model = load('model.joblib')
+        storage_client = storage.Client.from_service_account_json('credentials.json')
+        bucket = storage_client.bucket('pcloud2024-models')
+        blob = bucket.blob('model.joblib')
+        blob.download_to_filename('/tmp/model.joblib')
+        model = load('/tmp/model.joblib')
         for i in range(10):
             yp = model.predict([[r[-1][1],r[-2][1],r[-3][1],0]])
             r.append([len(r),yp[0]])
