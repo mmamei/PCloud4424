@@ -5,6 +5,8 @@ from google.cloud import firestore
 import json
 from joblib import load
 from google.cloud import storage
+from google.cloud import pubsub_v1
+from google.auth import jwt
 
 class User(UserMixin):
     def __init__(self, username):
@@ -46,8 +48,8 @@ def logout():
 
 db = 'sensors'
 coll = 'data'
-#db = firestore.Client.from_service_account_json('credentials.json', database=db)
-db = firestore.Client(database=db)
+db = firestore.Client.from_service_account_json('credentials.json', database=db)
+#db = firestore.Client(database=db)
 
 
 @app.route('/graph', methods=['GET'])
@@ -88,6 +90,7 @@ def add_data_http(s):
     data = request.values['data']
     val = float(request.values['val'])
     store_data(s,data,val)
+    return 'done'
 
 @app.route('/sensors/pubsub',methods=['POST'])
 def add_data_pubsub():
@@ -122,6 +125,9 @@ def store_data(s,data,val):
         doc_ref.set({'values': {data:val}})
     return 'ok',200
 
+
+
+
 @app.route('/sensors/<s>',methods=['GET'])
 def get_data(s):
     doc_ref = db.collection(coll).document(s)
@@ -135,20 +141,38 @@ def get_data(s):
             r.append([i,v])
             i += 1
 
-        #storage_client = storage.Client.from_service_account_json('credentials.json')
-        storage_client = storage.Client()
+        storage_client = storage.Client.from_service_account_json('credentials.json')
+        #storage_client = storage.Client()
         bucket = storage_client.bucket('pcloud2024-models')
         blob = bucket.blob('model.joblib')
         blob.download_to_filename('/tmp/model.joblib')
         model = load('/tmp/model.joblib')
 
+        yp = model.predict([[r[-2][1], r[-3][1], r[-4][1], 0]])
+        if abs(yp - r[-1][1]) > 10:
+            send_retrain_req()
+
         for i in range(10):
             yp = model.predict([[r[-1][1],r[-2][1],r[-3][1],0]])
             r.append([len(r),yp[0]])
 
+
+
         return json.dumps(r),200
     else:
         return 'sensor not found',404
+
+
+def send_retrain_req():
+    print('send retrain')
+    service_account_info = json.load(open("credentials.json"))
+    audience = "https://pubsub.googleapis.com/google.pubsub.v1.Publisher"
+    credentials = jwt.Credentials.from_service_account_info(service_account_info, audience=audience)
+    publisher = pubsub_v1.PublisherClient(credentials=credentials)
+    topic_path = publisher.topic_path('pcloud2024-2', 'retrainreq')
+    r = publisher.publish(topic_path, b'retrain!')
+    print(r.result())
+
 
 
 if __name__ == '__main__':

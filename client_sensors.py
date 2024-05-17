@@ -11,7 +11,7 @@ with open('CleanData_PM10.csv') as f:
         print(data,val)
         r = post(f'{base_url}/sensors/{sensor}',
                  data={'data':data,'val':val})
-        time.sleep(5)
+        time.sleep(1)
 
 
 print('done')
