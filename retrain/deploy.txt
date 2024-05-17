@@ -1,0 +1,3 @@
+gcloud functions deploy retrain --region europe-west8 --runtime python39 --trigger-topic retrainreq --gen2 --memory=512MiB
+
+https://cloud.google.com/functions/docs/configuring/memory
